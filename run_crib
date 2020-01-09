@@ -1,0 +1,42 @@
+#!/usr/bin/env php
+<?php
+
+use App\Entity\Animal;
+
+require __DIR__ . '/vendor/autoload.php';
+
+$arrAnimal = [
+    'App\Classes\Animal\Cow' => '\App\Classes\Product\Milk',
+    'App\Classes\Animal\Chicken' => '\App\Classes\Product\Egg',
+];
+
+$animals = [];
+
+foreach ($arrAnimal as $className => $product_name) {
+
+    $class = new $className;
+
+    echo "how many of those live on you farm ".(new ReflectionClass($class))->getShortName()." \n\n";
+    fscanf(STDIN, "%d\n", $number);
+
+    if (!$number > 0)
+        continue;
+
+    for ($i = 1; $i <= $number; $i++) {
+
+        echo "Enter registration_number for ".(new ReflectionClass($class))->getShortName()."#$i \n\n";
+        fscanf(STDIN, "%d\n", $registration_number);
+
+        $class = $class::create($registration_number);
+        $class->addProduct($product_name::create());
+
+        $animals[] = $class;
+    }
+}
+
+$cribService = new \App\Service\CribService();
+$controller = new \App\Controller\CribController();
+
+$cribService->addAnimals($animals);
+$controller->collection($cribService->getAnimals());
+$controller->viewResult($cribService->getAnimals());
